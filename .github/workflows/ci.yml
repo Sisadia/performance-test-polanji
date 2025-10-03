@@ -1,0 +1,48 @@
+name: ci action
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  k6-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - scenarios/endpoints.js
+          - scenarios/workflow.courseCompletion.js
+        profile: [ load, stress, spike, soak, custom ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Run ${{ matrix.profile }} test on ${{ matrix.scenario }}
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+          PROFILE: ${{ matrix.profile }}
+
+          VUS: 5
+          DURATION: 60s
+        run: |
+          mkdir -p artifacts/${{ matrix.profile }}
+          k6 run \
+            --summary-export=artifacts/${{ matrix.profile }}/summary.json \
+            ${{ matrix.scenario }}
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-${{ matrix.profile }}-${{ matrix.scenario }}
+          path: artifacts/${{ matrix.profile }}
+          if-no-files-found: ignore
