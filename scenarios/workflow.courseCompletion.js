@@ -18,3 +18,5 @@ export const options = {
 export function courseCompletion() {
   runCourseCompletion();
 }
+
+export { handleSummary } from "../utils/report.js";

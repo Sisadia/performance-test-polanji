@@ -1,8 +1,6 @@
 export function buildScenario(profile, execName, extraTags = {}) {
   
     const common = {
-    gracefulStop: "30s",
-    gracefulRampDown: "30s",
     tags: extraTags,
     exec: execName,
   };

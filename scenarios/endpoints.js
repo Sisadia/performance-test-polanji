@@ -18,3 +18,5 @@ export function endpoints() {
   const { token } = login(__ENV.USER_EMAIL, __ENV.USER_PASSWORD);
   getCourses(token);
 }
+
+export { handleSummary } from "../utils/report.js";
